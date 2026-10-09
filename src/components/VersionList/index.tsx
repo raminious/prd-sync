@@ -9,9 +9,10 @@ interface Props {
   slug: string;
   versions: PrdVersionMeta[];
   current: number;
+  isCompare: boolean;
 }
 
-export function VersionList({ slug, versions, current }: Props) {
+export function VersionList({ slug, versions, current, isCompare }: Props) {
   return (
     <Card>
       <CardHeader>
@@ -28,7 +29,10 @@ export function VersionList({ slug, versions, current }: Props) {
               )}
             >
               <div className="flex items-center gap-2">
-                <Link href={`/prds/${slug}?v=${version.number}`} className="font-medium underline">
+                <Link
+                  href={`/prds/${slug}?v=${version.number}${isCompare ? "&changes=1" : ""}`}
+                  className="font-medium underline"
+                >
                   v{version.number}
                 </Link>
                 {version.isMinor && <Badge variant="outline">minor</Badge>}

@@ -18,7 +18,7 @@ export default async function EditPrdPage({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <BackToList />
+      <BackToList project={prd.project} />
       <div>
         <h1 className="text-2xl font-semibold">Edit {prd.title}</h1>
         <p className="text-sm text-muted-foreground">
@@ -27,6 +27,7 @@ export default async function EditPrdPage({ params }: Props) {
       </div>
       <PrdForm
         author={author}
+        project={prd.project}
         prd={{
           slug: prd.slug,
           title: prd.title,

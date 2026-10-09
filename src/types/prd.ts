@@ -2,12 +2,14 @@ export interface Prd {
   id: number;
   slug: string;
   title: string;
+  project: string;
   latestVersion: number;
 }
 
 export interface PrdSummary {
   slug: string;
   title: string;
+  project: string;
   version: number;
   updatedAt: string;
   updatedBy: string;

@@ -15,7 +15,8 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS prds (
     id INTEGER PRIMARY KEY,
     slug TEXT NOT NULL UNIQUE,
-    title TEXT NOT NULL
+    title TEXT NOT NULL,
+    project TEXT NOT NULL DEFAULT 'hive-compute'
   );
 
   CREATE TABLE IF NOT EXISTS versions (
@@ -30,3 +31,7 @@ db.exec(`
     UNIQUE (prd_id, number)
   );
 `);
+
+// a database from before projects has no project column: its PRDs go to Hive Compute
+if (!db.prepare("SELECT 1 FROM pragma_table_info('prds') WHERE name = 'project'").get())
+  db.exec("ALTER TABLE prds ADD COLUMN project TEXT NOT NULL DEFAULT 'hive-compute'");

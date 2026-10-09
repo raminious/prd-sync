@@ -20,9 +20,14 @@ Tested with Node 24. The database is the built-in `node:sqlite`, and the data is
 ## How it works
 
 - PRDs are Markdown.
+- Each PRD is in one project. The projects are a fixed list in `src/lib/config.ts`: Hive Compute
+  and AI Services. The list page shows one project at a time, and "New PRD" makes a PRD in the
+  project that you see.
 - A save does not change a version. It adds a new one. A change summary is mandatory.
 - A save is rejected when a different person saved a newer version while you edited. Your text
   stays in the editor.
+- A PRD page has the switch "Show the changes from vN". It marks the changes from the previous
+  version in the text of the PRD: new text is green, removed text is red.
 - After a save, the app sends a Slack message with the summary and a link to the diff. Select
   "Minor edit" to skip the message.
 
@@ -32,7 +37,7 @@ Each route needs the header `Authorization: Bearer $PRD_API_TOKEN`.
 
 | Route                             | Returns                                                                                                                        |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `GET /api/prds`                   | JSON list: slug, title, latest version.                                                                                        |
+| `GET /api/prds`                   | JSON list: slug, title, project, latest version.                                                                               |
 | `GET /api/prds/:slug`             | The latest version as Markdown. Add `?version=N` for an old one. Headers: `X-PRD-Version`, `X-PRD-Latest-Version`.             |
 | `GET /api/prds/:slug/diff?from=N` | Text: the change summaries and a unified diff from version N to the latest version. Add `&to=M` to stop at an earlier version. |
 
@@ -63,4 +68,5 @@ npm run lint
 
 ## Not in the prototype
 
-Login and roles, email, rename and delete of a PRD, a rich-text editor, and comments.
+Login and roles, email, a form for a new project, rename and delete of a PRD, a rich-text editor,
+and comments.

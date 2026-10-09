@@ -189,40 +189,62 @@
 <section class="slide"><div class="inner">
   <span class="num">04</span>
   <h2>The version pin</h2>
-  <p>Each repo records the PRD version that its code agrees with. This record is the pin.</p>
-  <figure><svg viewBox="0 0 760 250" width="100%" style="max-width: 760px;" role="img" aria-label="A PRD has versions 1, 2, and 3. The pin of the repo is at version 1. The diff from version 1 to version 3 is the work list. After the work, the pin moves to version 3." xmlns="http://www.w3.org/2000/svg">
+  <p>The pin is one number in the repo: the PRD version that the code agrees with.</p>
+  <figure><svg viewBox="0 0 860 266" width="100%" style="max-width: 860px;" role="img" aria-label="PRD Admin keeps versions 1, 2, and 3 of a PRD. The repo keeps the pin in git. The pin is at version 1. The diff from version 1 to version 3 is the work list. After the work, a commit moves the pin to version 3." xmlns="http://www.w3.org/2000/svg">
     <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a8a49c"/></marker></defs>
     <g font-family="ui-sans-serif,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" text-anchor="middle">
-      <text x="20" y="24" text-anchor="start" font-size="13" letter-spacing="1.5" fill="#a09c93">PRD VERSIONS</text>
+      <g text-anchor="start">
+        <text x="0" y="56" font-size="13" font-weight="600" letter-spacing="1.5" fill="#ece9e2">PRD ADMIN</text>
+        <text x="0" y="76" font-size="14" fill="#a09c93">keeps the versions</text>
+        <text x="0" y="204" font-size="13" font-weight="600" letter-spacing="1.5" fill="#ece9e2">REPO, IN GIT</text>
+        <text x="0" y="224" font-size="14" fill="#a09c93">keeps the pin</text>
+      </g>
       <g fill="#1e2125" stroke="#5fc2bf">
-        <rect x="70" y="40" width="120" height="50" rx="6"/>
-        <rect x="320" y="40" width="120" height="50" rx="6"/>
-        <rect x="570" y="40" width="120" height="50" rx="6"/>
+        <rect x="195" y="36" width="120" height="50" rx="6"/>
+        <rect x="440" y="36" width="120" height="50" rx="6"/>
+        <rect x="685" y="36" width="120" height="50" rx="6"/>
       </g>
       <g fill="#ece9e2" font-size="19">
-        <text x="130" y="71">v1</text>
-        <text x="380" y="71">v2</text>
-        <text x="630" y="71">v3 · latest</text>
+        <text x="255" y="67">v1</text>
+        <text x="500" y="67">v2</text>
+        <text x="745" y="67">v3 · latest</text>
       </g>
       <g stroke="#a8a49c" stroke-width="2" marker-end="url(#arrow)">
-        <line x1="190" y1="65" x2="316" y2="65"/>
-        <line x1="440" y1="65" x2="566" y2="65"/>
+        <line x1="315" y1="61" x2="436" y2="61"/>
+        <line x1="560" y1="61" x2="681" y2="61"/>
       </g>
-      <path d="M130 98V118H630V98" fill="none" stroke="#5fc2bf" stroke-width="2"/>
-      <text x="380" y="144" font-size="16" fill="#5fc2bf">diff from the pin to the latest version = the work list</text>
-      <line x1="130" y1="118" x2="130" y2="190" stroke="#5fc2bf" stroke-width="2"/>
-      <line x1="630" y1="118" x2="630" y2="190" stroke="#a8a49c" stroke-width="2" stroke-dasharray="5 4"/>
-      <text x="20" y="180" text-anchor="start" font-size="13" letter-spacing="1.5" fill="#a09c93">REPO</text>
-      <rect x="70" y="190" width="120" height="46" rx="6" fill="#1e2125" stroke="#5fc2bf"/>
-      <text x="130" y="219" font-size="18" fill="#ece9e2">pin: v1</text>
-      <rect x="570" y="190" width="120" height="46" rx="6" fill="none" stroke="#a8a49c" stroke-dasharray="5 4"/>
-      <text x="630" y="219" font-size="18" fill="#a09c93">pin: v3</text>
-      <line x1="190" y1="213" x2="566" y2="213" stroke="#a8a49c" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
-      <text x="380" y="203" font-size="15" fill="#a09c93">after the work, the pin moves</text>
+      <path d="M255 94V114H745V94" fill="none" stroke="#5fc2bf" stroke-width="2"/>
+      <text x="500" y="140" font-size="16" fill="#5fc2bf">diff from the pin to the latest version = the work list</text>
+      <line x1="255" y1="114" x2="255" y2="186" stroke="#5fc2bf" stroke-width="2"/>
+      <line x1="745" y1="114" x2="745" y2="186" stroke="#a8a49c" stroke-width="2" stroke-dasharray="5 4"/>
+      <rect x="195" y="186" width="120" height="46" rx="6" fill="#1e2125" stroke="#5fc2bf"/>
+      <text x="255" y="215" font-size="18" fill="#ece9e2">pin: 1</text>
+      <rect x="685" y="186" width="120" height="46" rx="6" fill="none" stroke="#a8a49c" stroke-dasharray="5 4"/>
+      <text x="745" y="215" font-size="18" fill="#a09c93">pin: 3</text>
+      <line x1="315" y1="209" x2="681" y2="209" stroke="#a8a49c" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+      <text x="500" y="199" font-size="15" fill="#a09c93">after the work, a commit moves the pin</text>
+      <g font-size="14" fill="#a09c93">
+        <text x="255" y="254">one number in a file of the repo</text>
+        <text x="745" y="254">in the commit with the code</text>
+      </g>
     </g>
   </svg></figure>
+  <div class="cols">
+    <div>
+      <h3>Where it is</h3>
+      <p>One number for each PRD, in a file of the repo. It is in git, not in PRD Admin.</p>
+    </div>
+    <div>
+      <h3>How it is used</h3>
+      <p>Before the work, the agent sends the pin to PRD Admin and gets the changes after that version.</p>
+    </div>
+    <div>
+      <h3>How it changes</h3>
+      <p>The commit that completes the work sets the pin to the new version.</p>
+    </div>
+  </div>
   <div class="key"><p>"Does the code agree with the PRD?" now has <strong>an exact answer</strong>.</p></div>
-  <div class="notes"><b>Speaker notes · 50 s</b>This idea connects the PRD to the code. The PRD has versions 1, 2, and 3. The repo says: my code agrees with version 1. The tool then gives the diff from version 1 to the latest version. That diff is the list of work that is not done. When the work is done, the pin moves to version 3. The pin is in git with the code. So each commit tells us which PRD version it agrees with.</div>
+  <div class="notes"><b>Speaker notes · 50 s</b>This idea connects the PRD to the code. PRD Admin keeps the versions: 1, 2, and 3. The repo keeps the pin. The pin is one number in a file. It says: this code agrees with version 1. Before the work, the agent sends that number to PRD Admin. The answer is the diff from version 1 to version 3. That diff is the work list. When the work is done, the same commit changes the pin to 3. You do not set the pin in this tool. It is in git with the code, so each commit tells us which PRD version it agrees with.</div>
 </div></section>
 
 <section class="slide wide"><div class="inner">
@@ -276,7 +298,6 @@ Changes:
       <h3>Works today</h3>
       <ul>
         <li>PRDs with versions and a diff page</li>
-        <li>A Slack message on each save</li>
         <li>An API for coding agents</li>
         <li>A skill file that a repo can copy</li>
       </ul>
@@ -286,7 +307,6 @@ Changes:
       <ul>
         <li>Real login and roles</li>
         <li>A server. It runs on one laptop</li>
-        <li>The connection to <code>hcd-web</code></li>
         <li>Email messages</li>
       </ul>
     </div>

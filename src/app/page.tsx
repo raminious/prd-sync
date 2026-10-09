@@ -1,18 +1,44 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { PROJECTS } from "@/lib/config";
 import { formatDate } from "@/utils/format-date";
 import { listPrds } from "@/utils/prds/list-prds";
+import { getProject } from "@/utils/projects/get-project";
 
-export default function HomePage() {
-  const prds = listPrds();
+interface Props {
+  searchParams: Promise<{ project?: string }>;
+}
+
+export default async function HomePage({ searchParams }: Props) {
+  const project = getProject((await searchParams).project) ?? PROJECTS[0];
+  const prds = listPrds(project.slug);
+  const newPrdHref = `/new?project=${project.slug}`;
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">PRDs</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold">PRDs</h1>
+        <Button asChild size="sm">
+          <Link href={newPrdHref}>New PRD</Link>
+        </Button>
+      </div>
+      <nav aria-label="Projects" className="flex flex-wrap gap-2">
+        {PROJECTS.map(({ slug, name }) => {
+          const isCurrent = slug === project.slug;
+          return (
+            <Button key={slug} asChild size="sm" variant={isCurrent ? "secondary" : "ghost"}>
+              <Link href={`/?project=${slug}`} aria-current={isCurrent ? "page" : undefined}>
+                {name}
+              </Link>
+            </Button>
+          );
+        })}
+      </nav>
       {prds.length === 0 ? (
         <p className="text-muted-foreground">
-          There are no PRDs.{" "}
-          <Link href="/new" className="underline">
+          There are no PRDs in {project.name}.{" "}
+          <Link href={newPrdHref} className="underline">
             Create the first one.
           </Link>
         </p>

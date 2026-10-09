@@ -14,10 +14,11 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface Props {
   author: string;
+  project: string;
   prd?: { slug: string; title: string; version: number; content: string };
 }
 
-export function PrdForm({ author, prd }: Props) {
+export function PrdForm({ author, project, prd }: Props) {
   const [state, formAction, isPending] = useActionState(prd ? saveVersion : createPrd, null);
   const [content, setContent] = useState(prd?.content ?? "");
 
@@ -39,6 +40,7 @@ export function PrdForm({ author, prd }: Props) {
         </>
       ) : (
         <div className="flex flex-col gap-2">
+          <input type="hidden" name="project" value={project} />
           <Label htmlFor="title">Title</Label>
           <Input id="title" name="title" required placeholder="S3 Console Integration" />
         </div>
@@ -95,7 +97,7 @@ export function PrdForm({ author, prd }: Props) {
               {prd ? `Save as v${prd.version + 1}` : "Create PRD"}
             </Button>
             <Button asChild variant="ghost">
-              <Link href={prd ? `/prds/${prd.slug}` : "/"}>Cancel</Link>
+              <Link href={prd ? `/prds/${prd.slug}` : `/?project=${project}`}>Cancel</Link>
             </Button>
           </div>
           {prd && (

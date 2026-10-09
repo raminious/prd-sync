@@ -45,7 +45,7 @@ export default async function DiffPage({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <BackToList />
+      <BackToList project={prd.project} />
       {notice && (
         <p role="status" className="rounded-lg border bg-muted px-4 py-3 text-sm">
           {notice}

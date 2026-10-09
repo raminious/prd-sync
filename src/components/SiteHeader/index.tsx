@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 export function SiteHeader() {
   return (
@@ -8,9 +7,6 @@ export function SiteHeader() {
         <Link href="/" className="font-semibold">
           PRD Admin
         </Link>
-        <Button asChild size="sm">
-          <Link href="/new">New PRD</Link>
-        </Button>
       </div>
     </header>
   );

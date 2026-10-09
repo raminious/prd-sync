@@ -4,7 +4,7 @@ import type { Prd } from "@/types/prd";
 export function getPrd(slug: string) {
   return db
     .prepare(
-      `SELECT p.id, p.slug, p.title, MAX(v.number) AS latestVersion
+      `SELECT p.id, p.slug, p.title, p.project, MAX(v.number) AS latestVersion
        FROM prds p
        JOIN versions v ON v.prd_id = p.id
        WHERE p.slug = ?

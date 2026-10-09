@@ -1,7 +1,8 @@
 # Progress
 
-Last update: 2026-10-09, second session (the skill template). This file is a snapshot. Update it
-when the state changes.
+Last update: 2026-10-09, second session (the skill template, the presentation, projects, and the
+change view on the PRD page).
+This file is a snapshot. Update it when the state changes.
 
 ## Why this project exists
 
@@ -30,9 +31,19 @@ All of this works and was checked on 2026-10-09:
 - Each save adds a version. A change summary is mandatory.
 - A save is rejected when the content has no changes, or when a newer version was saved while the
   user edited. The text stays in the editor.
+- Change view on the PRD page: the switch "Show the changes from vN" (`?changes=1`) marks the
+  changes from the previous version in the rendered PRD. New text is green, removed text is red
+  with a line through it. It was checked in a headless browser with a temporary `zz-test-prd`
+  (paragraph, list, table, code block) and with the real S3 PRD.
 - Diff page for any two versions. It opens after each save and shows the notification result.
 - Slack message after each save, unless "Minor edit" is selected.
-- "All PRDs" back button on each page that is not the list.
+- Back button on each page that is not the list. Its text is the project name, for example
+  "Hive Compute PRDs".
+- Projects: each PRD is in one project. There are two, Hive Compute and AI Services. The list page
+  has a project switch (`/?project=<slug>`) and the "New PRD" button, which makes a PRD in the
+  selected project. The API list gives the project of each PRD. Checked in a headless browser:
+  the switch, a create in AI Services with a temporary `zz-test-prd`, and the refusal of an
+  address that exists in a different project.
 - API with a bearer token: list, PRD as Markdown, diff from a version.
 - The author of a version is the user name of the browser sign-in. The name field is read-only.
 - Skill template for other repos: `skill-template/prd-sync/SKILL.md`. A repo copies the folder. The
@@ -41,15 +52,16 @@ All of this works and was checked on 2026-10-09:
   against a stub server: it got the diff, reported the change, and left the pin.
 - Presentation for the managers: `presentation/index.html`. It is one file with no build step.
   Open it in a browser. It has 7 slides: 5 for the idea, 1 for the demo steps, 1 for the state and
-  the proposal. The speaker notes are about 380 words, so the talk and a 2-minute demo fit in 6 to
+  the proposal. The speaker notes are about 410 words, so the talk and a 2-minute demo fit in 6 to
   7 minutes. The layout comes from https://gmail-ingestion-proposal.raminious.workers.dev/. It
   was checked with screenshots at 1440x900 and 1280x720.
 
-Git: the only commit is the scaffold (`187ec5a`). All the work is uncommitted, because Ramin did not
-ask for a commit. Ask before you commit.
+Git: commit `058870c` has the work up to the first version of the presentation. The project change
+and the later presentation edits are not committed. Ask before you commit.
 
 Data: `data/prd.db` (not in git) has one PRD, `s3-console-integration`. Version 1 is the copy from
-the `hcd-web` skill. Version 2 is a save that Ramin made in the UI. Do not delete them.
+the `hcd-web` skill. Version 2 is a save that Ramin made in the UI. Do not delete them. The PRDs from before projects
+are in Hive Compute. `data/prd-before-projects.db` is a backup from before the `project` column.
 
 Environment: `.env.local` (not in git) has a generated `ADMIN_PASSWORD` and `PRD_API_TOKEN`.
 `SLACK_WEBHOOK_URL` was empty when the file was made, so messages go to the server log.
@@ -71,6 +83,11 @@ Ramin usually runs `npm run dev` in his own terminal. Check the port before you 
 | Cache Components are off in `next.config.ts`. The root layout has `dynamic = "force-dynamic"`. | Next.js 16.4 turns Cache Components on in new apps. A synchronous SQLite read then runs at build time, and the page shows old data. |
 | `PrdForm` submits with `onSubmit` and `startTransition`, not with a native `action`. | React resets a form after a native action submit, also when the server rejects the save. The user would lose the text. |
 | The actions change CRLF to LF in the content. | Browsers send textarea line ends as CRLF. Without this, a diff shows each line as changed. |
+| Projects are a fixed list in `src/lib/config.ts`, not a table. | Ramin asked for two projects and no "new project" form. A table has no use before that form exists. |
+| The address (slug) of a PRD is unique in all projects. | The page URLs, the API routes, and the pins in the repos do not change. The cost: two projects cannot have a PRD with the same title. |
+| The "New PRD" button is on the list page, not in the header. | The header does not know the selected project. The list page does. |
+| The change view puts rare bracket characters around the changed text in the Markdown source. A rehype plugin changes them into `<ins>` and `<del>`. | The PRD stays rendered Markdown, so the reader sees the changes in place. No raw HTML and no new dependency. Markdown reads the brackets as punctuation, so bold text and links do not break. |
+| A changed line shows the changed words only when the two lines are almost the same and no Markdown syntax changed. If not, it shows the full old line and the full new line. | A word mark in the middle of Markdown syntax (a link address, bold marks) breaks the line. |
 | Adoption is not solved. | The tool helps only if the product manager writes PRDs here and in no other place. Ramin said: think about it later. |
 
 ## Things that cost time
@@ -91,12 +108,18 @@ Ramin usually runs `npm run dev` in his own terminal. Check the port before you 
 - **The token line in `.env.local` has quotes or white space around the value.** Next.js removes
   them. A plain `grep | cut` in a shell does not, and the API then answers `Unauthorized`. The
   skill template removes them with `tr`.
+- **The running dev server did not rebuild the stylesheet after a change in `globals.css`.** It
+  sent the old rules for many minutes. Class names in source files show immediately, so the
+  colours of the change view are class names in `src/lib/change-marks.ts`.
+- **Known small flaws of the change view:** a numbered list counts the removed items, so its
+  numbers can be different from the PRD. A change of only a list number or a heading level does
+  not show. The view compares with the previous version only.
 - **Known small flaw:** after a rejected save, the button still shows the old "Save as vN" number.
 
 ## How to check a change
 
 ```bash
-npm test            # save, conflict, and unchanged logic on an in-memory database
+npm test            # save logic and project filter on an in-memory database, and the change marks
 npm run lint
 npx tsc --noEmit
 ```
@@ -134,7 +157,9 @@ Run it with `node --env-file=.env.local <script>`. Rules for a check on the real
    needs Ramin's go-ahead.
 3. **Real Slack test.** The call was tested only against a local stub (200, 500, no connection).
 4. **Email**, if the managers want it.
-5. **Rename and delete of a PRD.** The title is fixed when the PRD is made.
+5. **Rename and delete of a PRD.** The title is fixed when the PRD is made. The project is also
+   fixed: there is no form for a new project, and no way to move a PRD to a different project.
+   The Slack message does not name the project, and the API list has no project filter.
 6. **Real login and roles.** This replaces the shared password, and the author name then comes
    from a real identity.
 7. **Deployment.** SQLite needs a disk that stays. Set `APP_URL` to the public address.

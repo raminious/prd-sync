@@ -29,7 +29,7 @@ prd() { curl -sS -H "Authorization: Bearer $(get PRD_API_TOKEN)" "$(get PRD_ADMI
 
 prd "/s3-console-integration/diff?from=1"   # the changes after pin 1
 prd "/s3-console-integration"               # the latest version, as Markdown
-prd ""                                      # each PRD: slug, title, latest version
+prd ""                                      # each PRD: slug, title, project, latest version
 ```
 
 Add `&to=M` to stop a diff at version M. Add `?version=N` to get the old version N.
