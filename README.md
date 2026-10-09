@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PRD Admin
 
-## Getting Started
+A prototype with one job: create PRDs, keep each version, and serve them to people and to coding
+agents.
 
-First, run the development server:
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local   # then set ADMIN_PASSWORD and PRD_API_TOKEN
+npm install
+npm run dev                  # http://localhost:3210
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The browser asks for a user name and a password. Use your name as the user name and the value of
+`ADMIN_PASSWORD` as the password. Your name is recorded as the author of each version that you
+save. The app is locked when `ADMIN_PASSWORD` is empty.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Tested with Node 24. The database is the built-in `node:sqlite`, and the data is in `data/prd.db`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## How it works
 
-## Learn More
+- PRDs are Markdown.
+- A save does not change a version. It adds a new one. A change summary is mandatory.
+- A save is rejected when a different person saved a newer version while you edited. Your text
+  stays in the editor.
+- After a save, the app sends a Slack message with the summary and a link to the diff. Select
+  "Minor edit" to skip the message.
 
-To learn more about Next.js, take a look at the following resources:
+## API
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Each route needs the header `Authorization: Bearer $PRD_API_TOKEN`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Route                             | Returns                                                                                                                        |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `GET /api/prds`                   | JSON list: slug, title, latest version.                                                                                        |
+| `GET /api/prds/:slug`             | The latest version as Markdown. Add `?version=N` for an old one. Headers: `X-PRD-Version`, `X-PRD-Latest-Version`.             |
+| `GET /api/prds/:slug/diff?from=N` | Text: the change summaries and a unified diff from version N to the latest version. Add `&to=M` to stop at an earlier version. |
 
-## Deploy on Vercel
+## Use from a repo
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`skill-template/prd-sync/` is a skill for the coding agents of a repo. It tells them how to get a
+PRD, how to find the changes after the recorded version, and when to update that version.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Copy the folder into the skills folder of the repo:
+   `cp -r skill-template/prd-sync <repo>/.agents/skills/`
+2. Do the "Setup" steps at the end of its `SKILL.md`.
+
+How it works:
+
+- The skill file records the version that the code agrees with. For example:
+  `s3-console-integration`, pin 1.
+- Before work in that area, the agent calls the diff route with the recorded version.
+  - `No changes.` means that the code and the PRD agree.
+  - If not, the diff is the work list. The agent updates the recorded version when the work is
+    done.
+
+## Checks
+
+```bash
+npm test
+npm run lint
+```
+
+## Not in the prototype
+
+Login and roles, email, rename and delete of a PRD, a rich-text editor, and comments.

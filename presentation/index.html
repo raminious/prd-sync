@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PRD Admin</title>
+<meta name="description" content="Prototype: one place for PRDs, a version for each change, and one text for people and coding agents.">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #16181b;
+    --ink: #e8e5df;
+    --muted: #a09c93;
+    --faint: #6f6b64;
+    --line: #2a2e33;
+    --accent: #5fc2bf;
+    --panel: #1e2125;
+    --pad-y: max(5vh, 32px);
+    --pad-x: max(6vw, 22px);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: clamp(14px, 1.95vh, 18px);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    scroll-snap-type: y proximity;
+  }
+
+  .slide {
+    min-height: 100vh;
+    min-height: 100dvh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: calc(var(--pad-y) + env(safe-area-inset-top, 0px)) var(--pad-x) calc(var(--pad-y) + env(safe-area-inset-bottom, 0px));
+  }
+  .inner { width: 100%; max-width: 1000px; margin: 0 auto; }
+  .slide.wide .inner { max-width: 1240px; }
+
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(95,194,191,.35); }
+  a:hover { border-bottom-color: var(--accent); }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  code { font-size: .88em; background: var(--panel); padding: .12em .4em; border-radius: 4px; }
+  pre { background: var(--panel); border-radius: 8px; padding: 12px 16px; overflow-x: auto; font-size: .85em; margin: 12px 0; }
+  pre code { background: none; padding: 0; }
+
+  .kicker { color: var(--accent); font-size: .72em; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; margin-bottom: 1.4em; }
+  h1 { font-size: clamp(30px, 6.4vh, 60px); line-height: 1.05; letter-spacing: -.03em; font-weight: 700; margin: 0 0 .35em; }
+  .lede { font-size: 1.28em; color: var(--muted); margin: 0 0 1.4em; max-width: 46ch; text-wrap: balance; }
+  .num { color: var(--faint); font-size: .72em; letter-spacing: .16em; display: block; margin-bottom: .9em; font-variant-numeric: tabular-nums; }
+  h2 { font-size: clamp(23px, 4.1vh, 38px); line-height: 1.15; letter-spacing: -.022em; font-weight: 650; margin: 0 0 .75em; }
+  h3 { font-size: .76em; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 1.6em 0 .6em; }
+  p { margin: 0 0 .8em; }
+
+  ul, ol { margin: 0 0 .8em; padding-left: 0; list-style: none; }
+  li { position: relative; padding-left: 1.35em; margin-bottom: .45em; }
+  ul > li::before { content: ""; position: absolute; left: .25em; top: .72em; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+  ol { counter-reset: step; }
+  ol > li::before { counter-increment: step; content: counter(step) "."; position: absolute; left: 0; top: 0; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+  .table-wrap { overflow-x: auto; margin: 0 0 .8em; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: .5em 1em .5em 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: .74em; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+  td.num-cell, th.num-cell { text-align: right; padding-right: 0; font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+
+  .key { border-left: 2px solid var(--accent); padding: .1em 0 .1em .9em; margin: 1.1em 0; }
+  .key p { margin: 0; }
+  .key strong { color: var(--accent); }
+
+  figure { margin: .9em 0; text-align: center; }
+  figure svg { display: block; margin: 0 auto; height: auto; max-height: 52vh; }
+  figure.tall svg { max-height: min(78vh, 900px); }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 0 3.5em; }
+  .split > * { min-width: 0; }
+  .split figure { margin: 0; }
+
+  .notes { margin-top: 1.6em; color: var(--faint); font-size: .84em; line-height: 1.5; max-width: 76ch; }
+  .notes b { display: block; font-size: .8em; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: .3em; }
+
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0 3em; }
+  .cols h3:first-child { margin-top: 0; }
+
+  .hint { color: var(--faint); font-size: .84em; margin-top: 2.4em; }
+  .hint kbd { font: inherit; border: 1px solid var(--line); border-radius: 4px; padding: 0 .4em; color: var(--muted); }
+
+  #counter {
+    position: fixed;
+    right: calc(var(--pad-x) + env(safe-area-inset-right, 0px));
+    bottom: calc(max(3vh, 16px) + env(safe-area-inset-bottom, 0px));
+    color: var(--faint);
+    font-size: 12px;
+    letter-spacing: .12em;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+
+  @media (min-width: 901px) and (max-height: 820px) {
+    figure { margin: .6em 0; }
+    figure svg { max-height: 42vh; }
+    li { margin-bottom: .35em; }
+    .notes { margin-top: 1.1em; }
+  }
+
+  @media (min-width: 901px) and (max-height: 700px) {
+    figure svg { max-height: 38vh; }
+    h2 { margin-bottom: .5em; }
+  }
+
+  @media (max-width: 900px) {
+    .split { grid-template-columns: 1fr; gap: 1.4em; }
+    figure.tall svg { max-height: none; }
+  }
+
+  @media (max-width: 700px) {
+    body { font-size: 15px; }
+    .slide { min-height: 0; padding-top: 44px; padding-bottom: 44px; border-bottom: 1px solid var(--line); scroll-snap-align: none; }
+    figure svg { max-height: none; }
+    #counter { display: none; }
+  }
+
+  @media print {
+    body { background: #fff; color: #111; font-size: 12pt; scroll-snap-type: none; }
+    :root { --muted: #444; --faint: #666; --line: #ccc; --accent: #0a5e5d; --panel: #f2f2ef; }
+    .slide { min-height: 0; break-after: page; padding: 0 0 18pt; display: block; }
+    figure svg { max-height: 52vh; filter: invert(1) hue-rotate(180deg); }
+    #counter, .hint { display: none; }
+    a { color: inherit; border: none; }
+  }
+</style>
+</head>
+<body>
+<section class="slide"><div class="inner">
+  <div class="kicker">Prototype · Hive compute console</div>
+  <h1>PRD Admin</h1>
+  <p class="lede">One place for PRDs. Each change has a version. People and coding agents read the same text.</p>
+  <p class="notes">Author: Ramin Mousavi - <a href="https://raminmousavi.dev" target="_blank">raminmousavi.dev</a></p>
+  <div class="key"><p><strong>Main idea:</strong> a repo records the PRD version that its code agrees with. The diff to the latest version is the work list.</p></div>
+  <div class="notes"><b>Speaker notes · 15 s</b>This is a prototype. It has one job: it keeps our PRDs and our code in agreement. I will show the idea in four slides, and then the app.</div>
+  <p class="hint">Use <kbd>←</kbd> <kbd>→</kbd> or <kbd>Space</kbd> to move between slides.</p>
+</div></section>
+
+<section class="slide"><div class="inner">
+  <span class="num">02</span>
+  <h2>Two problems today</h2>
+  <div class="cols">
+    <div>
+      <h3>The PRD and the code do not agree</h3>
+      <ul>
+        <li>The repo keeps a hand copy of each PRD for the coding agents</li>
+        <li>The PRD changes, but the copy does not</li>
+        <li>The agents build from the old copy</li>
+      </ul>
+    </div>
+    <div>
+      <h3>A change does not reach the team</h3>
+      <ul>
+        <li>A PRD changes after the work started</li>
+        <li>The developers and the design team do not always get the news</li>
+      </ul>
+    </div>
+  </div>
+  <div class="key"><p><strong>Result:</strong> people and agents can build from an old PRD.</p></div>
+  <div class="notes"><b>Speaker notes · 40 s</b>In the compute console repo, the agents read a hand copy of the S3 PRD. Our own skill file says that this copy is a snapshot and not the source of truth. So each PRD change needs a person who updates the copy. The second problem is about people. When a PRD changes, the news depends on memory. If someone forgets, the developers and the designers continue with the old text.</div>
+</div></section>
+
+<section class="slide"><div class="inner">
+  <span class="num">03</span>
+  <h2>One source for each PRD</h2>
+  <ul>
+    <li>PRDs are Markdown, in one place</li>
+    <li>People read them in the browser. Coding agents read them through an API</li>
+    <li>A save does not change a version. It adds a new one</li>
+    <li>Each version has an author and a mandatory change summary</li>
+    <li>Each save sends a Slack message with the summary and a link to the diff</li>
+  </ul>
+  <div class="key"><p><strong>Nobody must remember to tell the team.</strong> The save tells them.</p></div>
+  <div class="notes"><b>Speaker notes · 40 s</b>The tool works like git, but for PRDs. You cannot change an old version. You can only add a new one. So we always know who changed what, and when. The change summary is mandatory. It goes to Slack with a link to the diff. There is one exception: the writer can mark a save as a minor edit, for example a spelling correction. Then no message goes out.</div>
+</div></section>
+
+<section class="slide"><div class="inner">
+  <span class="num">04</span>
+  <h2>The version pin</h2>
+  <p>Each repo records the PRD version that its code agrees with. This record is the pin.</p>
+  <figure><svg viewBox="0 0 760 250" width="100%" style="max-width: 760px;" role="img" aria-label="A PRD has versions 1, 2, and 3. The pin of the repo is at version 1. The diff from version 1 to version 3 is the work list. After the work, the pin moves to version 3." xmlns="http://www.w3.org/2000/svg">
+    <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a8a49c"/></marker></defs>
+    <g font-family="ui-sans-serif,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" text-anchor="middle">
+      <text x="20" y="24" text-anchor="start" font-size="13" letter-spacing="1.5" fill="#a09c93">PRD VERSIONS</text>
+      <g fill="#1e2125" stroke="#5fc2bf">
+        <rect x="70" y="40" width="120" height="50" rx="6"/>
+        <rect x="320" y="40" width="120" height="50" rx="6"/>
+        <rect x="570" y="40" width="120" height="50" rx="6"/>
+      </g>
+      <g fill="#ece9e2" font-size="19">
+        <text x="130" y="71">v1</text>
+        <text x="380" y="71">v2</text>
+        <text x="630" y="71">v3 · latest</text>
+      </g>
+      <g stroke="#a8a49c" stroke-width="2" marker-end="url(#arrow)">
+        <line x1="190" y1="65" x2="316" y2="65"/>
+        <line x1="440" y1="65" x2="566" y2="65"/>
+      </g>
+      <path d="M130 98V118H630V98" fill="none" stroke="#5fc2bf" stroke-width="2"/>
+      <text x="380" y="144" font-size="16" fill="#5fc2bf">diff from the pin to the latest version = the work list</text>
+      <line x1="130" y1="118" x2="130" y2="190" stroke="#5fc2bf" stroke-width="2"/>
+      <line x1="630" y1="118" x2="630" y2="190" stroke="#a8a49c" stroke-width="2" stroke-dasharray="5 4"/>
+      <text x="20" y="180" text-anchor="start" font-size="13" letter-spacing="1.5" fill="#a09c93">REPO</text>
+      <rect x="70" y="190" width="120" height="46" rx="6" fill="#1e2125" stroke="#5fc2bf"/>
+      <text x="130" y="219" font-size="18" fill="#ece9e2">pin: v1</text>
+      <rect x="570" y="190" width="120" height="46" rx="6" fill="none" stroke="#a8a49c" stroke-dasharray="5 4"/>
+      <text x="630" y="219" font-size="18" fill="#a09c93">pin: v3</text>
+      <line x1="190" y1="213" x2="566" y2="213" stroke="#a8a49c" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+      <text x="380" y="203" font-size="15" fill="#a09c93">after the work, the pin moves</text>
+    </g>
+  </svg></figure>
+  <div class="key"><p>"Does the code agree with the PRD?" now has <strong>an exact answer</strong>.</p></div>
+  <div class="notes"><b>Speaker notes · 50 s</b>This idea connects the PRD to the code. The PRD has versions 1, 2, and 3. The repo says: my code agrees with version 1. The tool then gives the diff from version 1 to the latest version. That diff is the list of work that is not done. When the work is done, the pin moves to version 3. The pin is in git with the code. So each commit tells us which PRD version it agrees with.</div>
+</div></section>
+
+<section class="slide wide"><div class="inner">
+  <div class="split">
+  <div>
+  <span class="num">05</span>
+  <h2>Coding agents follow the same rule</h2>
+  <p>A repo copies one skill file. The file holds the pins and these steps:</p>
+  <ol>
+    <li>Before the work, get the diff from the pin</li>
+    <li>If the PRD changed, tell the developer what changed</li>
+    <li>Read the latest PRD, then do the work</li>
+    <li>Move the pin only when the code agrees with each change</li>
+  </ol>
+  <div class="notes"><b>Speaker notes · 40 s</b>The agents do not read a copy. They ask the tool each time. On the right is real output from the prototype: version 2, the date, the author, and the summary. The full diff comes below that. I tested the skill file with a new agent in a test repo. It reported the PRD change before it wrote code. It did not move the pin, because the change was not built.</div>
+  </div>
+  <pre><code>$ prd "/s3-console-integration/diff?from=1"
+
+PRD: S3 Console Integration (s3-console-integration)
+From: v1
+To: v2 (latest)
+
+Changes:
+- v2 (2026-10-09, Ramin): Added a new item to the list
+
+--- s3-console-integration@v1
++++ s3-console-integration@v2
+@@ -248,8 +248,9 @@
+…</code></pre>
+  </div>
+</div></section>
+
+<section class="slide"><div class="inner">
+  <span class="num">06</span>
+  <h2>Demo</h2>
+  <ol>
+    <li>Open a PRD and its version list</li>
+    <li>Change one line. Write the change summary. Save</li>
+    <li>See the diff page and the result of the Slack message</li>
+    <li>In the terminal, get the changes after the pin, as an agent does</li>
+  </ol>
+  <p><a href="http://localhost:3210" target="_blank">Open the app</a></p>
+  <div class="notes"><b>Speaker notes · 2 min</b>Do only these four steps. Use the PRD "S3 Console Integration". For step 4, the "Agent access" button on the PRD page shows the command. Come back to this page for the last slide.</div>
+</div></section>
+
+<section class="slide"><div class="inner">
+  <span class="num">07</span>
+  <h2>State and next step</h2>
+  <div class="cols">
+    <div>
+      <h3>Works today</h3>
+      <ul>
+        <li>PRDs with versions and a diff page</li>
+        <li>A Slack message on each save</li>
+        <li>An API for coding agents</li>
+        <li>A skill file that a repo can copy</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Not in the prototype</h3>
+      <ul>
+        <li>Real login and roles</li>
+        <li>A server. It runs on one laptop</li>
+        <li>The connection to <code>hcd-web</code></li>
+        <li>Email messages</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Open question</h3>
+      <ul>
+        <li>Where do we write PRDs today?</li>
+        <li>Will we write them only here?</li>
+      </ul>
+    </div>
+  </div>
+  <div class="key"><p><strong>Proposal:</strong> a pilot with one PRD and one repo. S3 Console Integration in <code>hcd-web</code>.</p></div>
+  <div class="notes"><b>Speaker notes · 40 s</b>The prototype shows the idea. It is not ready for the team: it has one shared password, and it runs on my machine. The largest risk is not technical. The tool helps only if we write PRDs here and in no other place. So I propose a small pilot with one PRD and one repo. After the pilot, we know if the pin works for us.</div>
+</div></section>
+
+<div id="counter"></div>
+<script>
+(function () {
+  var slides = [].slice.call(document.querySelectorAll('.slide'));
+  var counter = document.getElementById('counter');
+  function index() {
+    var best = 0;
+    for (var i = 0; i < slides.length; i++) {
+      if (slides[i].getBoundingClientRect().top <= window.innerHeight * 0.4) best = i;
+    }
+    return best;
+  }
+  function paint() { counter.textContent = (index() + 1) + ' / ' + slides.length; }
+  function go(i) {
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    window.scrollTo({ top: slides[i].offsetTop, behavior: 'smooth' });
+  }
+  window.addEventListener('scroll', paint, { passive: true });
+  window.addEventListener('resize', paint);
+  paint();
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    switch (e.key) {
+      case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ': case 'j':
+        e.preventDefault(); go(index() + 1); break;
+      case 'ArrowLeft': case 'ArrowUp': case 'PageUp': case 'k':
+        e.preventDefault(); go(index() - 1); break;
+      case 'Home': e.preventDefault(); go(0); break;
+      case 'End': e.preventDefault(); go(slides.length - 1); break;
+    }
+  });
+})();
+</script>
+</body>
+</html>
